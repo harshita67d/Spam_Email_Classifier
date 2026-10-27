@@ -8,7 +8,7 @@ This project detects whether an email is Spam or Not Spam using Machine Learning
 - Pandas
 - Scikit-learn
 - TF-IDF Vectorizer
-- Naive Bayes
+  
 
 ## How to Run
 1. Install the required libraries:
