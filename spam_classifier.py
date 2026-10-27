@@ -1,59 +1,50 @@
-import pandas as pd
-import string
-
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import LinearSVC
+from sklearn.pipeline import make_pipeline
 from sklearn.metrics import accuracy_score
 
-# Load dataset
-data = pd.read_csv("spam.csv")
+X = df["message"]
+y = df["label"]
 
-# Convert labels
-data["label"] = data["label"].map({"ham":0,"spam":1})
-
-# Clean text
-def clean_text(text):
-    text = text.lower()
-    text = "".join(ch for ch in text if ch not in string.punctuation)
-    return text
-
-data["text"] = data["text"].apply(clean_text)
-
-# Split features and labels
-X = data["text"]
-y = data["label"]
-
-# Convert text to numbers
-vectorizer = TfidfVectorizer()
-X = vectorizer.fit_transform(X)
-
-# Split dataset
 X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2,
-    random_state=42
+    X, y, test_size=0.2, random_state=4215
 )
 
-# Train model
-model = MultinomialNB()
+model = make_pipeline(
+    TfidfVectorizer(),
+    LinearSVC()
+)
+
 model.fit(X_train, y_train)
 
-# Test model
-prediction = model.predict(X_test)
+predictions = model.predict(X_test)
 
-print("Accuracy:", accuracy_score(y_test, prediction))
+print("Accuracy:", accuracy_score(y_test, predictions))
+# Appendix C.1: Testing a New Message
+messages = [
+    "You have won a free prize!",
+    "Your class starts at 10 AM."
+]
 
-# Predict new email
-email = ["Congratulations! You won a free laptop"]
+results = model.predict(messages)
 
-email_vector = vectorizer.transform(email)
+for message, result in zip(messages, results):
+    print(message, ":", result)
 
-result = model.predict(email_vector)
 
-if result[0] == 1:
-    print("Spam Email")
-else:
-    print("Not Spam")
+# Appendix C.2: Displaying a Graph
+import matplotlib.pyplot as plt
+
+df["label"].value_counts().plot(kind="bar")
+plt.title("Spam and Legitimate Messages")
+plt.xlabel("Message Type")
+plt.ylabel("Number of Messages")
+plt.show()
+
+
+# Appendix C.3: Saving the Model
+import joblib
+
+joblib.dump(model, "spam_model.pkl")
     
